@@ -1,0 +1,32 @@
+[project]
+site_name = "molcrafts-molcfg"
+site_url = "https://github.com/MolCrafts/molcfg/tree/master/docs"
+site_description = "Zero-dependency configuration library for predictable loading, merging, validation, and source tracking."
+site_author = "Roy Kid"
+copyright = "&copy; 2026 Roy Kid"
+docs_dir = "docs"
+site_dir = "site"
+repo_url = "https://github.com/MolCrafts/molcfg"
+repo_name = "MolCrafts/molcfg"
+edit_uri = "edit/master/docs/"
+nav = [
+  {"Overview" = "index.md"},
+  {"Getting Started" = "getting-started.md"},
+  {"Sources" = "sources.md"},
+  {"Validation" = "validation.md"},
+  {"Concurrency" = "concurrency.md"},
+  {"Release Notes" = "release-notes.md"},
+]
+
+[project.theme]
+features = [
+  "navigation.instant",
+  "navigation.instant.progress",
+  "content.action.edit",
+  "content.action.view",
+]
+
+[project.theme.icon]
+repo = "fontawesome/brands/github"
+edit = "material/pencil"
+view = "material/eye"

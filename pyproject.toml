@@ -1,0 +1,60 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "molcrafts-molcfg"
+version = "1.0.0"
+description = "Zero-dependency configuration library for the molcrafts ecosystem"
+readme = "README.md"
+requires-python = ">=3.12"
+license = "BSD-3-Clause"
+license-files = ["LICENSE"]
+authors = [
+  { name = "Roy Kid" }
+]
+keywords = ["config", "configuration", "environment", "validation", "merge"]
+classifiers = [
+  "Development Status :: 5 - Production/Stable",
+  "Intended Audience :: Developers",
+  "Operating System :: OS Independent",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Topic :: Utilities",
+]
+
+[project.urls]
+Homepage = "https://github.com/MolCrafts/molcfg"
+Documentation = "https://github.com/MolCrafts/molcfg/tree/master/docs"
+Repository = "https://github.com/MolCrafts/molcfg"
+Issues = "https://github.com/MolCrafts/molcfg/issues"
+Changelog = "https://github.com/MolCrafts/molcfg/blob/master/CHANGELOG.md"
+
+[project.optional-dependencies]
+dev = ["pytest>=8.0", "ruff>=0.11"]
+docs = ["zensical>=0.0.32"]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["molcfg*"]
+
+[tool.setuptools.package-data]
+molcfg = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-ra"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
