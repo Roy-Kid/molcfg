@@ -1,48 +1,41 @@
 # molcfg
 
-`molcfg` is a compact Python configuration library for projects that want a predictable, dependency-free runtime core.
+Zero-dependency Python configuration library for services, CLIs, and internal tooling that need predictable loading, merging, and validation without a heavy runtime.
 
-It focuses on four things:
+[Get started](getting-started.md){ .md-button .md-button--primary }
+[API reference](api.md){ .md-button }
 
-- loading configuration from multiple sources
-- merging layered settings without accidental aliasing
-- validating nested structures with explicit rules
-- keeping runtime behavior understandable through source tracking
+## What it gives you
 
-## What ships in 1.0
+- Layered loading from dicts, TOML/JSON files, environment variables, and CLI arguments
+- Deep merge, override, and append strategies — all return isolated copies
+- Recursive schema validation with defaults, strict unknown-field checks, and built-in constraints
+- Source tracking via `Config.meta()` so every value can be explained
+- Attribute and dotted-path access, freeze, snapshot, and rollback on the same `Config` object
+- Thread-safe wrapper and POSIX file lock for concurrent access patterns
+- `${path.to.key}` and `${env:VAR}` interpolation with circular-reference detection
+- No runtime dependencies
 
-- `Config` with attribute and dotted-path access
-- `ConfigLoader` and `ProfileLoader`
-- environment and CLI sources with type coercion
-- merge strategies for override, append, and deep merge
-- interpolation with circular-reference detection
-- recursive validation with defaults and strict unknown-field checks
-- thread-safe config wrapping and file locks
-
-## Example
+## Quick example
 
 ```python
 from molcfg import CliSource, ConfigLoader, DictSource, EnvSource
 
-cfg = ConfigLoader(
-    [
-        DictSource({"db": {"host": "localhost", "port": 5432}}, name="defaults"),
-        EnvSource(prefix="APP", name="env"),
-        CliSource(["--db.port=6432"], name="cli"),
-    ]
-).load()
+cfg = ConfigLoader([
+    DictSource({"db": {"host": "localhost", "port": 5432}}, name="defaults"),
+    EnvSource(prefix="APP", name="env"),
+    CliSource(["--db.port=6432"], name="cli"),
+]).load()
 
 assert cfg["db.port"] == 6432
-assert cfg.meta("db.port") == {
-    "source": "cli",
-    "history": ("defaults", "cli"),
-}
+assert cfg.meta("db.port") == {"source": "cli", "history": ("defaults", "cli")}
 ```
 
-## Documentation Map
+## Documentation map
 
-- Start with [Getting Started](getting-started.md) for installation and first usage.
-- See [Sources](sources.md) for file, env, and CLI loading details.
-- See [Validation](validation.md) for defaults, strict mode, and nested schemas.
-- See [Concurrency](concurrency.md) for lock-related APIs.
-- See [Release Notes](release-notes.md) for `1.0.0` changes.
+- [Getting Started](getting-started.md) — installation, first config, layered loading
+- [Sources](sources.md) — file, environment, and CLI source details
+- [Validation](validation.md) — schemas, defaults, strict mode, constraints
+- [Merge](merge.md) — merge strategies, `ConfigLoader`, `ProfileLoader`
+- [Concurrency](concurrency.md) — thread-safe wrapper, file locks, interpolation
+- [API Reference](api.md) — complete exported surface

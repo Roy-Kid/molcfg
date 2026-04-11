@@ -11,11 +11,17 @@ repo_name = "MolCrafts/molcfg"
 edit_uri = "edit/master/docs/"
 nav = [
   {"Overview" = "index.md"},
-  {"Getting Started" = "getting-started.md"},
-  {"Sources" = "sources.md"},
-  {"Validation" = "validation.md"},
-  {"Concurrency" = "concurrency.md"},
-  {"Release Notes" = "release-notes.md"},
+  {"Guide" = [
+    "getting-started.md",
+    "sources.md",
+    "validation.md",
+    "merge.md",
+    "concurrency.md"
+  ]},
+  {"Reference" = [
+    "api.md",
+    "release-notes.md"
+  ]}
 ]
 
 [project.theme]

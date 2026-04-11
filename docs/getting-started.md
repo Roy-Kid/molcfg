@@ -6,17 +6,12 @@
 pip install molcrafts-molcfg
 ```
 
-The PyPI distribution name is `molcrafts-molcfg`, while the Python import remains `molcfg`.
+The PyPI distribution name is `molcrafts-molcfg`; the import name is `molcfg`.
 
 For local development:
 
 ```bash
 pip install -e ".[dev]"
-```
-
-For docs work:
-
-```bash
 pip install -e ".[docs]"
 ```
 
@@ -25,40 +20,80 @@ pip install -e ".[docs]"
 ```python
 from molcfg import Config
 
-cfg = Config({"app": {"name": "demo"}})
+cfg = Config({"app": {"name": "demo", "debug": False}})
 
+# attribute access
 assert cfg.app.name == "demo"
+
+# dotted-path access
 assert cfg["app.name"] == "demo"
+
+# containment check
+assert "app.debug" in cfg
 ```
 
-## Layered Loading
+## Mutating a Config
+
+```python
+cfg.app.name = "updated"
+cfg["app.debug"] = True
+```
+
+Nested dicts are automatically wrapped into child `Config` objects.
+
+## Freezing and rollback
+
+```python
+cfg.freeze()
+# cfg.app.name = "x"  # raises FrozenConfigError
+
+cfg.unfreeze()
+cfg.snapshot()
+cfg.app.name = "temporary"
+cfg.rollback()
+assert cfg.app.name == "updated"
+```
+
+## Layered loading
+
+Later sources win using `DEEP_MERGE` by default:
 
 ```python
 from molcfg import CliSource, ConfigLoader, DictSource, EnvSource
 
-loader = ConfigLoader(
-    [
-        DictSource({"db": {"host": "localhost", "port": 5432}}, name="defaults"),
-        EnvSource(prefix="APP", name="env"),
-        CliSource(["--db.port=6432"], name="cli"),
-    ]
-)
+cfg = ConfigLoader([
+    DictSource({"db": {"host": "localhost", "port": 5432}}, name="defaults"),
+    EnvSource(prefix="APP", name="env"),
+    CliSource(["--db.port=6432"], name="cli"),
+]).load()
 
-cfg = loader.load()
+assert cfg["db.port"] == 6432
 ```
 
-Later sources override earlier ones using `MergeStrategy.DEEP_MERGE` by default.
-
-## Inspecting Source History
+## Source tracking
 
 ```python
-cfg.meta("db.port")
+info = cfg.meta("db.port")
+# {"source": "cli", "history": ("defaults", "cli")}
 ```
 
-Typical result:
+`source` is the last writer. `history` lists every source that touched the key, in order.
+
+## Serialization
 
 ```python
-{"source": "cli", "history": ("defaults", "cli")}
+d = cfg.to_dict()
+s = cfg.to_json()
+s = cfg.to_json(indent=2)
 ```
 
-This is useful when operators need to answer why a value changed.
+## Change callbacks
+
+```python
+def on_change(path: str, new_value, old_value) -> None:
+    print(f"{path}: {old_value!r} -> {new_value!r}")
+
+cfg.on_change(on_change)
+cfg.app.name = "watched"
+# app.name: 'demo' -> 'watched'
+```

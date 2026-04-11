@@ -1,6 +1,8 @@
 # Validation
 
-## Basic Validation
+`validate()` checks a plain dict against a class-based schema and returns a validated copy.
+
+## Basic usage
 
 ```python
 from molcfg import validate
@@ -9,12 +11,15 @@ class DbSchema:
     host: str
     port: int
 
-validate({"host": "localhost", "port": 5432}, DbSchema)
+result = validate({"host": "localhost", "port": 5432}, DbSchema)
+assert result == {"host": "localhost", "port": 5432}
 ```
+
+Annotations drive type checking. `validate()` raises `ValidationError` on mismatch.
 
 ## Defaults
 
-Set `apply_defaults=True` to return a completed object:
+Annotate fields with default values and pass `apply_defaults=True`:
 
 ```python
 class DbSchema:
@@ -25,19 +30,22 @@ result = validate({}, DbSchema, apply_defaults=True)
 assert result == {"host": "localhost", "port": 5432}
 ```
 
-## Strict Unknown-Field Handling
+## Strict mode
 
-Set `allow_extra=False` to reject keys not present in the schema:
+Reject keys not declared in the schema:
 
 ```python
 validate(
-    {"host": "localhost", "debug": True},
+    {"host": "localhost", "unknown_key": True},
     DbSchema,
     allow_extra=False,
 )
+# raises ValidationError: unexpected field 'unknown_key'
 ```
 
-## Nested Schemas
+## Nested schemas
+
+Annotate a field with another class to validate recursively:
 
 ```python
 class DbSchema:
@@ -46,27 +54,50 @@ class DbSchema:
 
 class AppSchema:
     db: DbSchema
+    debug: bool = False
 
-validated = validate({"db": {}}, AppSchema, apply_defaults=True)
+result = validate({"db": {"host": "localhost"}}, AppSchema, apply_defaults=True)
+assert result == {"db": {"host": "localhost", "port": 5432}, "debug": False}
 ```
 
-`molcfg` also supports `list[Schema]` and `dict[K, V]`.
+`list[Schema]` and `dict[K, V]` are also supported.
+
+## Optional fields
+
+Use `field: Type | None = None`:
+
+```python
+class Schema:
+    name: str
+    alias: str | None = None
+```
+
+## Supported types
+
+- Primitives: `str`, `int`, `float`, `bool`, `None`
+- `Literal["a", "b"]`
+- `list[T]`, `dict[K, V]`
+- Nested class schemas
+- `T | None` for optional fields
 
 ## Constraints
 
-Built-in constraint helpers:
-
-- `Range`
-- `Length`
-- `Pattern`
-- `OneOf`
-
-Example:
+Attach constraints to schema fields via `__constraints__`:
 
 ```python
-from molcfg import Range
+from molcfg import Length, OneOf, Pattern, Range
 
-class DbSchema:
+class ServerSchema:
+    host: str
     port: int
-    __constraints__ = {"port": [Range(1, 65535)]}
+    env: str
+    token: str
+    __constraints__ = {
+        "port": [Range(1, 65535)],
+        "env": [OneOf("dev", "staging", "prod")],
+        "token": [Length(min=32)],
+        "host": [Pattern(r"^[\w\.\-]+$")],
+    }
 ```
+
+`validate()` checks constraints after type validation. `ValidationError` includes the field name and constraint that failed.

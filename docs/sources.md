@@ -1,16 +1,41 @@
 # Sources
 
-## Available Sources
+A source loads configuration from one origin and returns a plain `dict`. `ConfigLoader` merges multiple sources in order.
 
-- `DictSource`
-- `JsonFileSource`
-- `TomlFileSource`
-- `EnvSource`
-- `CliSource`
+## DictSource
 
-## Environment Variables
+Wraps an in-memory dict. Useful for defaults and test fixtures.
 
-`EnvSource` splits variables into nested config objects.
+```python
+from molcfg import DictSource
+
+src = DictSource({"db": {"host": "localhost", "port": 5432}}, name="defaults")
+data = src.load()
+```
+
+## JsonFileSource
+
+Reads a JSON file from disk.
+
+```python
+from molcfg import JsonFileSource
+
+src = JsonFileSource("config.json", name="file")
+```
+
+## TomlFileSource
+
+Reads a TOML file from disk.
+
+```python
+from molcfg import TomlFileSource
+
+src = TomlFileSource("config.toml", name="file")
+```
+
+## EnvSource
+
+Reads environment variables and maps them into nested keys by splitting on `_`.
 
 ```python
 from molcfg import EnvSource
@@ -18,48 +43,55 @@ from molcfg import EnvSource
 src = EnvSource(
     prefix="APP",
     environ={
-        "APP_DB_HOST": "localhost",
+        "APP_DB_HOST": "prod-db",
         "APP_DB_PORT": "5432",
         "APP_DEBUG": "true",
     },
 )
 
 assert src.load() == {
-    "db": {"host": "localhost", "port": 5432},
+    "db": {"host": "prod-db", "port": 5432},
     "debug": True,
 }
 ```
 
-## CLI Arguments
+`prefix` is stripped and not included in the output key. Keys are lowercased. Pass `environ=` to inject a custom env dict (useful in tests); omit it to read `os.environ`.
+
+## CliSource
+
+Parses a list of `--key=value` or `--key value` arguments.
 
 ```python
 from molcfg import CliSource
 
 src = CliSource(["--db.host=localhost", "--db.port", "5432", "--debug=true"])
+assert src.load() == {"db": {"host": "localhost", "port": 5432}, "debug": True}
 ```
 
-`CliSource` supports both `--key=value` and `--key value`.
+Dotted keys map directly to nested dicts.
 
-## Coercion Rules
+## Coercion
 
-By default, environment and CLI sources convert common string values:
+`EnvSource` and `CliSource` coerce string values by default:
 
-- `true` and `false` to booleans
-- integers like `5432` to `int`
-- floats like `3.14` to `float`
-- `null` and `none` to `None`
-- JSON-style values like `["a", "b"]` or `{"x": 1}` to Python values
+| Input | Result |
+|-------|--------|
+| `"true"` / `"false"` | `bool` |
+| `"5432"` | `int` |
+| `"3.14"` | `float` |
+| `"null"` / `"none"` | `None` |
+| `'["a","b"]'` | `list` |
+| `'{"x":1}'` | `dict` |
 
-Use `coerce=False` when exact strings matter.
+Pass `coerce=False` to keep raw strings.
 
-## Naming Sources
+## Naming sources
 
-All sources accept a `name` that is recorded in metadata:
+All sources accept a `name` argument recorded in metadata:
 
 ```python
-from molcfg import DictSource
-
-defaults = DictSource({"db": {"host": "localhost"}}, name="defaults")
+DictSource({"x": 1}, name="defaults")
+EnvSource(prefix="APP", name="env")
 ```
 
-Use stable names like `defaults`, `env`, `file`, `profile:prod`, or `cli`.
+Use stable, descriptive names. They appear in `Config.meta()` history.
