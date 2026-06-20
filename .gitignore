@@ -182,3 +182,4 @@ pyrightconfig.json
 # are runtime-local (permission overrides, scheduler lock).
 .claude/settings.local.json
 .claude/scheduled_tasks.lock
+uv.lock
