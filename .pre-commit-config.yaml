@@ -1,4 +1,15 @@
+# Mirrors every check in .github/workflows/*.yml. Any divergence is a bug --
+# when you add/modify a CI step, update this file in the same commit.
+#
+# CI runs every check through `uv run` against the locked env (uv.lock), so
+# the local hooks below ALSO use `uv run` to guarantee identical tool
+# versions. Do NOT swap these for the ruff-pre-commit remote repo: that would
+# pin a ruff version independent of uv.lock and silently diverge from CI.
+
+default_install_hook_types: [pre-commit, pre-push]
+
 repos:
+  # --- hygiene (not in CI, but cheap local safety) ---
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
@@ -6,25 +17,24 @@ repos:
       - id: end-of-file-fixer
       - id: check-yaml
         args: ['--unsafe']
-      - id: check-added-large-files
-        args: ['--maxkb=1024']
-      - id: check-merge-conflict
-      - id: mixed-line-ending
       - id: check-toml
-      - id: check-json
 
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.11.12
-    hooks:
-      - id: ruff-format
-      - id: ruff
-        args: [--fix, --exit-non-zero-on-fix]
-
+  # --- CI parity: .github/workflows/ci.yml ---
   - repo: local
     hooks:
-      - id: ty
-        name: ty (type check)
-        entry: ty check src/
+      # ci.yml `lint` job: uv run ruff check .
+      - id: ruff-check
+        name: ruff check (CI lint job)
+        entry: uv run ruff check .
         language: system
-        types: [python]
         pass_filenames: false
+        always_run: true
+
+      # ci.yml `test` job: uv run pytest -q
+      - id: pytest
+        name: pytest (CI test job)
+        entry: uv run pytest -q
+        language: system
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
