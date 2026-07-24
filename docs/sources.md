@@ -33,6 +33,16 @@ from molcfg import TomlFileSource
 src = TomlFileSource("config.toml", name="file")
 ```
 
+## YamlFileSource
+
+Reads a YAML file from disk. Requires `pyyaml` (molcfg's single runtime dependency). An empty file loads as `{}`.
+
+```python
+from molcfg import YamlFileSource
+
+src = YamlFileSource("config.yaml", name="file")
+```
+
 ## EnvSource
 
 Reads environment variables and maps them into nested keys by splitting on `_`.
@@ -55,7 +65,7 @@ assert src.load() == {
 }
 ```
 
-`prefix` is stripped and not included in the output key. Keys are lowercased. Pass `environ=` to inject a custom env dict (useful in tests); omit it to read `os.environ`.
+`prefix` is stripped and not included in the output key. Keys are lowercased. The split character is configurable via `separator=` (default `"_"`). Pass `environ=` to inject a custom env dict (useful in tests); omit it to read `os.environ`.
 
 ## CliSource
 
@@ -94,4 +104,4 @@ DictSource({"x": 1}, name="defaults")
 EnvSource(prefix="APP", name="env")
 ```
 
-Use stable, descriptive names. They appear in `Config.meta()` history.
+If you omit `name`, the source records its class name instead (e.g. `"DictSource"`). Use stable, descriptive names. They appear in `Config.meta()` history.
