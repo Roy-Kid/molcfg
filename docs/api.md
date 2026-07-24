@@ -25,17 +25,32 @@ Nested configuration container. Nested dicts are automatically wrapped into chil
 - `keys()`, `values()`, `items()` — top-level iteration
 - `to_dict()` — recursive plain-dict export
 - `to_json(**kwargs)` — JSON string; passes kwargs to `json.dumps`
+- `to_toml()` — TOML string
+- `to_yaml(**kwargs)` — YAML string; passes kwargs to `yaml.dump`
+- `save_json(path, **kwargs)` / `save_toml(path)` / `save_yaml(path, **kwargs)` — write the config to a file
 - `freeze()` — recursively freeze; raises `FrozenConfigError` on write
 - `unfreeze()` — recursively unfreeze
 - `snapshot()` — push current state onto the snapshot stack
-- `rollback()` — pop and restore the last snapshot
+- `rollback()` — pop and restore the last snapshot (raises `ConfigError` if the stack is empty)
 - `on_change(callback)` — register `callback(path, new_value, old_value)`
-- `meta(path)` — return `{"source": str, "history": tuple}` for a dotted path
+- `meta(path="")` — return `{"source": str, "history": tuple}` for a dotted path, or `None` if the path has no recorded metadata
 - `metadata()` — return the full metadata dict
 
 ### Properties
 
 - `frozen` — `True` if the config is currently frozen
+
+### Class-level loaders
+
+```python
+Config.load_json(path)   # -> Config
+Config.load_toml(path)   # -> Config
+Config.load_yaml(path)   # -> Config
+```
+
+Convenience shortcuts that read a single file. Source tracking is **not**
+recorded — for provenance, load through `ConfigLoader` with the matching
+`*FileSource` instead.
 
 ---
 
@@ -45,10 +60,12 @@ All sources inherit from `Source` and expose a single method:
 
 - `load() -> dict[str, Any]`
 
+Every source accepts an optional `name`. When omitted (`None`), the source's class name is recorded in metadata; the name is what appears in `Config.meta()` history.
+
 ### DictSource
 
 ```python
-DictSource(data: dict, *, name: str = "")
+DictSource(data: dict, name: str | None = None)
 ```
 
 Wraps an in-memory dict.
@@ -56,27 +73,42 @@ Wraps an in-memory dict.
 ### JsonFileSource
 
 ```python
-JsonFileSource(path: str | Path, *, name: str = "")
+JsonFileSource(path: str | Path, name: str | None = None)
 ```
 
 ### TomlFileSource
 
 ```python
-TomlFileSource(path: str | Path, *, name: str = "")
+TomlFileSource(path: str | Path, name: str | None = None)
 ```
+
+### YamlFileSource
+
+```python
+YamlFileSource(path: str | Path, name: str | None = None)
+```
+
+Loads a YAML file (requires `pyyaml`). An empty file yields `{}`.
 
 ### EnvSource
 
 ```python
-EnvSource(prefix: str = "", *, coerce: bool = True, environ: dict | None = None, name: str = "")
+EnvSource(
+    prefix: str = "",
+    separator: str = "_",
+    environ: dict | None = None,
+    *,
+    coerce: bool = True,
+    name: str | None = None,
+)
 ```
 
-Reads environment variables and maps them to nested keys by splitting on `_`. `prefix` is stripped and not included in the output key.
+Reads environment variables and maps them to nested keys by splitting on `separator` (default `_`). `prefix` is stripped and not included in the output key.
 
 ### CliSource
 
 ```python
-CliSource(args: list[str], *, coerce: bool = True, name: str = "")
+CliSource(args: list[str], *, coerce: bool = True, name: str | None = None)
 ```
 
 Parses `--key=value` and `--key value` arguments. Dotted keys map to nested dicts.
@@ -128,21 +160,22 @@ ProfileLoader(base_sources: list[Source], profiles: dict[str, Source], strategy:
 validate(
     data: dict,
     schema: type,
+    prefix: str = "",
     *,
-    apply_defaults: bool = False,
     allow_extra: bool = True,
+    apply_defaults: bool = False,
 ) -> dict
 ```
 
-Raises `ValidationError` on type mismatch, missing required fields, or constraint failure.
+Raises `ValidationError` on type mismatch, missing required fields, or constraint failure. Returns the input dict unchanged unless `apply_defaults=True`, in which case a new dict with defaults filled in is returned. `prefix` prefixes reported error paths and is mainly used for nested validation.
 
 ### Constraints
 
 ```python
-Range(min: float | None = None, max: float | None = None)
-Length(min: int | None = None, max: int | None = None)
-Pattern(pattern: str)
-OneOf(*choices)
+Range(min_val: int | float, max_val: int | float)   # inclusive [min_val, max_val]
+Length(min_len: int = 0, max_len: int | None = None)
+Pattern(pattern: str)                                # re.search against the value
+OneOf(*values)
 ```
 
 Attach via `__constraints__ = {"field": [constraint, ...]}` on the schema class.
@@ -209,7 +242,7 @@ Wraps all reads and writes in the provided lock (or a new `RLock`). Exposes the 
 FileLock(path: str | Path)
 ```
 
-Context manager. Acquires `fcntl.LOCK_EX` on entry, releases on exit.
+Context manager. Acquires an exclusive lock on entry (`fcntl.LOCK_EX` on POSIX, `msvcrt.locking` on Windows) and releases it on exit.
 
 - `acquire()` / `release()` for manual management
 
@@ -220,6 +253,25 @@ interpolate(data: dict, environ: dict | None = None) -> dict
 ```
 
 Resolves `${path.to.key}` and `${env:VAR}` placeholders. Raises `CircularReferenceError` on circular references.
+
+---
+
+## Paths
+
+### project_config_dir()
+
+```python
+project_config_dir(name: str, *, environ: Mapping[str, str] | None = None) -> Path
+```
+
+Returns `~/.molcrafts/<name>/config/`, creating it (and any missing parents)
+if absent, so downstream tools share a stable user-level configuration
+directory. `name` must be a single path segment — not empty, `.`, `..`, or
+containing `/`, `\`, or `os.sep` (otherwise `ValueError` is raised and no
+directory is created). If the `MOLCRAFTS_HOME` environment variable is set to
+a non-empty value it overrides the `~/.molcrafts` base; empty or
+whitespace-only values fall back to the default. Pass `environ=` to inject a
+mapping instead of reading `os.environ`.
 
 ---
 

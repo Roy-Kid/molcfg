@@ -1,5 +1,28 @@
 # Release Notes
 
+## 1.4.1
+
+Release date: 2026-05-11
+
+### Added
+
+- **`project_config_dir(name, *, environ=None)`** — resolves and creates
+  `~/.molcrafts/<name>/config/` so downstream tools (e.g. `molq` writing a
+  SQLite database) share a stable user-level configuration directory.
+  `MOLCRAFTS_HOME` overrides the base; empty or whitespace-only values fall
+  back to the default. Pass `environ=` to inject a mapping for full isolation
+  from `os.environ` in tests.
+
+### Breaking changes
+
+None.
+
+## 1.4.0
+
+Release date: 2026-04-18
+
+Release-suite version bump — no functional changes beyond 1.3.0.
+
 ## 1.3.0
 
 Release date: 2026-04-18
@@ -30,9 +53,28 @@ Release date: 2026-04-18
 
 None.
 
+## 1.2.0
+
+Release date: 2026-04-13
+
+### Added
+
+- **`YamlFileSource`** — load configuration from YAML files, alongside the
+  existing JSON and TOML file sources.
+
+### Changed
+
+- PyYAML is now a required runtime dependency (previously molcfg had no
+  runtime dependencies). The "zero-dependency" framing was dropped from the
+  package description and docs.
+
+### Breaking changes
+
+None.
+
 ## 1.0.0
 
-Release date: 2026-04-12
+Release date: 2026-04-11
 
 First stable release.
 

@@ -1,15 +1,13 @@
-# Mirrors every check in .github/workflows/*.yml. Any divergence is a bug --
-# when you add/modify a CI step, update this file in the same commit.
+# Managed by prek: `prek install`
+# Gates via tox from pyproject optional-dependencies `dev`
+#   commit/pre-push: uv run --extra dev tox -e lint
+#   pre-push:        uv run --extra dev tox -e py
 #
-# CI runs every check through `uv run` against the locked env (uv.lock), so
-# the local hooks below ALSO use `uv run` to guarantee identical tool
-# versions. Do NOT swap these for the ruff-pre-commit remote repo: that would
-# pin a ruff version independent of uv.lock and silently diverge from CI.
+# Install: prek install
 
 default_install_hook_types: [pre-commit, pre-push]
 
 repos:
-  # --- hygiene (not in CI, but cheap local safety) ---
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
@@ -17,23 +15,26 @@ repos:
       - id: end-of-file-fixer
       - id: check-yaml
         args: ['--unsafe']
+      - id: check-added-large-files
+        args: ['--maxkb=1024']
+      - id: check-merge-conflict
+      - id: mixed-line-ending
       - id: check-toml
+      - id: check-json
 
-  # --- CI parity: .github/workflows/ci.yml ---
   - repo: local
     hooks:
-      # ci.yml `lint` job: uv run ruff check .
-      - id: ruff-check
-        name: ruff check (CI lint job)
-        entry: uv run ruff check .
+      - id: tox-lint
+        name: "CI lint (uv run --extra dev tox -e lint)"
+        entry: uv run --extra dev tox -e lint
         language: system
         pass_filenames: false
         always_run: true
+        stages: [pre-commit, pre-push]
 
-      # ci.yml `test` job: uv run pytest -q
-      - id: pytest
-        name: pytest (CI test job)
-        entry: uv run pytest -q
+      - id: tox-py
+        name: "CI test (uv run --extra dev tox -e py)"
+        entry: uv run --extra dev tox -e py
         language: system
         pass_filenames: false
         always_run: true
