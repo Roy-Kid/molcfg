@@ -2,6 +2,11 @@
 
 from molcfg.concurrency import FileLock, ThreadSafeConfig, interpolate
 from molcfg.config import Config
+from molcfg.environment import EnvVar, UndeclaredEnvVar
+from molcfg.environment import declare as declare_env_var
+from molcfg.environment import declared as declared_env_vars
+from molcfg.environment import describe as describe_env
+from molcfg.environment import get as get_env_var
 from molcfg.errors import (
     CircularReferenceError,
     ConfigError,
@@ -58,4 +63,11 @@ __all__ = [
     "interpolate",
     # Paths
     "project_config_dir",
+    # Environment — the one door to os.environ
+    "EnvVar",
+    "UndeclaredEnvVar",
+    "declare_env_var",
+    "declared_env_vars",
+    "describe_env",
+    "get_env_var",
 ]
