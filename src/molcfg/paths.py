@@ -46,10 +46,14 @@ def _expand(path: str, environ: Mapping[str, str]) -> Path:
 
 
 def _resolve_base(environ: Mapping[str, str]) -> Path:
-    raw = environ.get(_HOME_ENV_VAR)
+    # Read through molcfg.environment so both names stay listable; the mapping
+    # is still injected, so a caller passing `environ` remains isolated.
+    from molcfg.environment import get as _env_get
+
+    raw = _env_get(_HOME_ENV_VAR, environ=environ)
     if raw is not None and raw.strip():
         return _expand(raw, environ)
-    home = environ.get("HOME")
+    home = _env_get("HOME", environ=environ)
     if home is not None:
         return Path(home) / ".molcrafts"
     return Path(_DEFAULT_BASE).expanduser()

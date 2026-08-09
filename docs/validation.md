@@ -1,6 +1,6 @@
 # Validation
 
-`validate()` checks a plain dict against a class-based schema and returns a validated copy.
+`validate()` checks a plain dict against a class-based schema and returns the validated data. With `apply_defaults=True` it returns a new dict with missing defaults filled in; otherwise it returns the input dict unchanged.
 
 ## Basic usage
 
@@ -95,7 +95,7 @@ class ServerSchema:
     __constraints__ = {
         "port": [Range(1, 65535)],
         "env": [OneOf("dev", "staging", "prod")],
-        "token": [Length(min=32)],
+        "token": [Length(min_len=32)],
         "host": [Pattern(r"^[\w\.\-]+$")],
     }
 ```

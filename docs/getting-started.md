@@ -85,6 +85,13 @@ info = cfg.meta("db.port")
 d = cfg.to_dict()
 s = cfg.to_json()
 s = cfg.to_json(indent=2)
+t = cfg.to_toml()
+y = cfg.to_yaml()
+
+# write directly to a file
+cfg.save_json("out.json", indent=2)
+cfg.save_toml("out.toml")
+cfg.save_yaml("out.yaml")
 ```
 
 ## Change callbacks

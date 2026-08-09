@@ -1,5 +1,4 @@
 include README.md
-include CHANGELOG.md
 include CONTRIBUTING.md
 include RELEASING.md
 include LICENSE

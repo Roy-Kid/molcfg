@@ -31,7 +31,7 @@ cfg2 = ThreadSafeConfig(Config({"b": 2}), lock=lock)
 
 ## FileLock
 
-`FileLock` provides a POSIX file lock via `fcntl.flock`. Use it when multiple processes may update the same file-backed state.
+`FileLock` provides a cross-platform exclusive file lock — `fcntl.flock` on POSIX and `msvcrt.locking` on Windows. Use it when multiple processes may update the same file-backed state.
 
 ```python
 from molcfg import FileLock

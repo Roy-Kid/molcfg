@@ -79,8 +79,8 @@ For non-trivial work, prefer:
 
 - **Runtime deps**: only `pyyaml`. Do not add others without an explicit decision.
 - **Public API** in `molcfg/__init__.py`: this is a stable library. Renames or
-  removals are breaking changes — schedule for a major release and update
-  `CHANGELOG.md`.
+  removals are breaking changes — schedule for a major release (history lives
+  in git tags / GitHub Releases; no hand-written CHANGELOG).
 - **Source-tracking contract**: every value loaded must round-trip through
   `Config.meta()` with `source` and `history`. Tests in `test_integration.py`
   protect this — do not weaken them.
