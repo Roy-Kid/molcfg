@@ -31,16 +31,15 @@ dependencies = [
 
 [project.urls]
 Homepage = "https://github.com/MolCrafts/molcfg"
-Documentation = "https://github.com/MolCrafts/molcfg/tree/master/docs"
+Documentation = "https://docs.molcrafts.org/molcfg/"
 Repository = "https://github.com/MolCrafts/molcfg"
 Issues = "https://github.com/MolCrafts/molcfg/issues"
-Changelog = "https://github.com/MolCrafts/molcfg/blob/master/CHANGELOG.md"
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "ruff>=0.11",
   "tox>=4.23",
 ]
-docs = ["zensical>=0.0.45", "molcrafts-zensical-theme>=0.1.1"]
+docs = ["zensical>=0.0.53", "molcrafts-zensical-theme>=0.2.5"]
 
 [tool.setuptools]
 package-dir = {"" = "src"}

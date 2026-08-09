@@ -1,7 +1,7 @@
 [project]
 site_name = "molcfg"
 site_description = "Configuration library for predictable loading, merging, validation, and source tracking."
-site_url = "https://molcrafts.github.io/molcfg/"
+site_url = "https://docs.molcrafts.org/molcfg/"
 site_author = "Roy Kid"
 copyright = "Copyright &copy; 2026 MolCrafts"
 docs_dir = "docs"
@@ -20,7 +20,6 @@ nav = [
     { "Concurrency" = "concurrency.md" },
   ] },
   { "API Reference" = "api.md" },
-  { "Changelog" = "release-notes.md" },
 ]
 
 # Shared MolCrafts theme (github.com/MolCrafts/molcrafts-zensical-theme): brand

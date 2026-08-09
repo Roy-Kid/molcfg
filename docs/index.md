@@ -5,6 +5,7 @@ hide:
   - navigation
   - toc
 hero:
+  kicker: molcfg Manual
   title: molcfg
   description: Load configuration from dicts, files, environment variables, and CLI arguments; merge the layers into one immutable object; validate it against a schema; and ask any value where it came from. A single runtime dependency, and every operation returns an isolated copy.
   install:

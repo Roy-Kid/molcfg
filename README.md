@@ -16,7 +16,7 @@
 </p>
 
 <p>
-  <a href="https://github.com/MolCrafts/molcfg/tree/master/docs"><b>Documentation</b></a> &nbsp;&middot;&nbsp;
+  <a href="https://docs.molcrafts.org/molcfg/"><b>Documentation</b></a> &nbsp;&middot;&nbsp;
   <a href="#quick-start"><b>Quick start</b></a> &nbsp;&middot;&nbsp;
   <a href="#molcrafts-ecosystem"><b>Ecosystem</b></a>
 </p>
@@ -66,15 +66,16 @@ assert cfg.meta("db.port") == {"source": "cli", "history": ("defaults", "cli")}
 
 ## Documentation
 
-Full documentation lives in [`docs/`](https://github.com/MolCrafts/molcfg/tree/master/docs):
+Full documentation: [docs.molcrafts.org/molcfg](https://docs.molcrafts.org/molcfg/)
+(sources in [`docs/`](docs/)):
 
-- [Getting started](https://github.com/MolCrafts/molcfg/blob/master/docs/getting-started.md)
-- [Sources](https://github.com/MolCrafts/molcfg/blob/master/docs/sources.md)
-- [Validation](https://github.com/MolCrafts/molcfg/blob/master/docs/validation.md)
-- [Merge strategies](https://github.com/MolCrafts/molcfg/blob/master/docs/merge.md)
-- [Registry](https://github.com/MolCrafts/molcfg/blob/master/docs/registry.md)
-- [Concurrency](https://github.com/MolCrafts/molcfg/blob/master/docs/concurrency.md)
-- [API reference](https://github.com/MolCrafts/molcfg/blob/master/docs/api.md)
+- [Getting started](https://docs.molcrafts.org/molcfg/getting-started/)
+- [Sources](https://docs.molcrafts.org/molcfg/sources/)
+- [Validation](https://docs.molcrafts.org/molcfg/validation/)
+- [Merge strategies](https://docs.molcrafts.org/molcfg/merge/)
+- [Registry](https://docs.molcrafts.org/molcfg/registry/)
+- [Concurrency](https://docs.molcrafts.org/molcfg/concurrency/)
+- [API reference](https://docs.molcrafts.org/molcfg/api/)
 
 ## MolCrafts ecosystem
 
